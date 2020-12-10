@@ -2,11 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MyForms.Data.Models;
 
 namespace MyForms.Data
 {
     public interface IDataRepository
     {
-        IEnumerable<dynamic> GetFormsNumber();
+        Form GetForm(int formId);
+        IEnumerable<Question> GetFormQuestions(int formId);
+        IEnumerable<Result> GetFormResults(int formId);
+        string GetFormUserId(int formId);
+
     }
 }

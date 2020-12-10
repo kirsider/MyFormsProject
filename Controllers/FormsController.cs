@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyForms.Data;
+using MyForms.Data.Models;
 
 namespace MyForms.Controllers
 {
@@ -19,10 +20,17 @@ namespace MyForms.Controllers
             _dataRepository = dataRepository;
         }
 
-        [HttpGet("count")]
-        public IEnumerable<dynamic> GetFormsCount()
+        [HttpGet("{formId}")]
+        public ActionResult<Form> GetForm(int formId)
         {
-            return _dataRepository.GetFormsNumber();
+            return _dataRepository.GetForm(formId);
         }
+
+        [HttpGet("{formId}/results")]
+        public IEnumerable<Result> GetFormResults(int formId)
+        {
+            return _dataRepository.GetFormResults(formId);
+        }
+
     }
 }
