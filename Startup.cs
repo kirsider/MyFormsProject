@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using MyForms.Data;
 
 namespace MyForms
 {
@@ -25,7 +26,17 @@ namespace MyForms
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<IDataRepository, DataRepository>();
+
             services.AddControllers();
+
+            services.AddCors(options =>
+              options.AddPolicy("CorsPolicy", builder =>
+                builder.AllowAnyMethod()
+                .AllowAnyHeader()
+                .WithOrigins("http://localhost:5000")
+                .AllowCredentials())
+              );
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -35,6 +46,8 @@ namespace MyForms
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseCors("CorsPolicy");
 
             app.UseHttpsRedirection();
 
