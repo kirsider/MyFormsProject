@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyForms.Data;
 using MyForms.Data.Models;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace MyForms.Controllers
 {
@@ -30,6 +32,13 @@ namespace MyForms.Controllers
         public IEnumerable<Result> GetFormResults(int formId)
         {
             return _dataRepository.GetFormResults(formId);
+        }
+
+        [HttpPost]  
+        public ActionResult<FormPostRequest> PostForm([FromBody] FormPostRequest form)
+        {
+            _dataRepository.PostForm(form);
+            return CreatedAtAction("PostForm", form);
         }
 
     }

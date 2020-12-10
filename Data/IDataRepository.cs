@@ -13,5 +13,8 @@ namespace MyForms.Data
         IEnumerable<Result> GetFormResults(int formId);
         string GetFormUserId(int formId);
 
+        Form PostForm(FormPostRequest formPostRequest);
+        Question PostQuestion(QuestionPostRequest questionPostRequest);
+
     }
 }
