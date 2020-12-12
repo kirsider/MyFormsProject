@@ -9,12 +9,13 @@ namespace MyForms.Data
     public interface IDataRepository
     {
         Form GetForm(int formId);
-        IEnumerable<Question> GetFormQuestions(int formId);
+        IEnumerable<Form> GetUserForms(string userId);
+        Question[] GetFormQuestions(int formId);
         IEnumerable<Result> GetFormResults(int formId);
         string GetFormUserId(int formId);
 
         Form PostForm(FormPostRequest formPostRequest);
         Question PostQuestion(QuestionPostRequest questionPostRequest);
-
+        Result PostResult(ResultPostRequest resultPostRequest);
     }
 }

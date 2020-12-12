@@ -25,7 +25,14 @@ namespace MyForms.Controllers
         [HttpGet("{formId}")]
         public ActionResult<Form> GetForm(int formId)
         {
-            return _dataRepository.GetForm(formId);
+            Form form = _dataRepository.GetForm(formId);
+            return form;
+        }
+
+        [HttpGet("userforms/{uid}")]
+        public IEnumerable<Form> GetUserForms(string uid)
+        {
+            return _dataRepository.GetUserForms(uid);
         }
 
         [HttpGet("{formId}/results")]
@@ -35,10 +42,17 @@ namespace MyForms.Controllers
         }
 
         [HttpPost]  
-        public ActionResult<FormPostRequest> PostForm([FromBody] FormPostRequest form)
+        public ActionResult<Form> PostForm([FromBody] FormPostRequest form)
         {
-            _dataRepository.PostForm(form);
-            return CreatedAtAction("PostForm", form);
+            var savedForm = _dataRepository.PostForm(form);
+            return CreatedAtAction("PostForm", savedForm);
+        }
+
+        [HttpPost("results")] 
+        public ActionResult<Result> PostResult([FromBody] ResultPostRequest result)
+        {
+            var savedResult = _dataRepository.PostResult(result);
+            return CreatedAtAction("PostResult", savedResult);
         }
 
     }

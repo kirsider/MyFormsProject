@@ -29,30 +29,50 @@ namespace MyForms.Data
                 connection.Open();
 
                 var form = connection.QueryFirstOrDefault<Form>(
-                    @"SELECT id, name, description FROM form
+                    @"SELECT id, name AS fname, description FROM form
                       WHERE id=@FormId;", new {FormId = formId}
                 );
 
                 form.Questions = GetFormQuestions(formId);
-                form.UserId = GetFormUserId(formId);
+                form.Uid = GetFormUserId(formId);
                 return form;
             }
         }
 
-        public IEnumerable<Question> GetFormQuestions(int formId)
+        public IEnumerable<Form> GetUserForms(string userId)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+
+                var forms = connection.Query<Form>(
+                    @"SELECT form.id, user_form.uid as uid, form.name AS fname, form.description FROM form 
+                      JOIN user_form ON (form.id = user_form.fid)
+                      WHERE user_form.uid=@UserId;", new { UserId = userId }
+                );
+
+                return forms;
+            }
+        }
+
+        public Question[] GetFormQuestions(int formId)
         {
             using (var connection = new MySqlConnection(_connectionString))
             {
                 connection.Open();
 
                 var questions = connection.Query<Question>(
-                    @"SELECT question.id, question.name, question.type, question.options 
+                    @"SELECT question.id, question.name AS qname, question.type, question.options 
                       FROM form JOIN form_question ON(form_question.fid = form.id)
                       JOIN question ON(form_question.qid = question.id)
                       WHERE form.id=@FormId;", new { FormId = formId }
                 );
 
-                return questions;
+                foreach (var question in questions)
+                {
+                    question.Options = JsonSerializer.Deserialize<string[]>(question.Options);
+                }
+                return questions.ToArray();
             }
         }
 
@@ -78,7 +98,7 @@ namespace MyForms.Data
                 connection.Open();
 
                 var results = connection.Query<Result>(
-                    @"SELECT id, answers FROM result
+                    @"SELECT id, fid, answers FROM result 
                       WHERE fid=@FormId;", new { FormId = formId }
                 );
 
@@ -134,12 +154,6 @@ namespace MyForms.Data
 
         public Question PostQuestion(QuestionPostRequest questionPostRequest)
         {
-            var dict = new Dictionary<string, string>
-            {
-                ["single choice"] = "single",
-                ["multiple choice"] = "multiple",
-                ["text answer"] = "text"
-            };
             using (var connection = new MySqlConnection(_connectionString))
             {
                 connection.Open();
@@ -148,13 +162,34 @@ namespace MyForms.Data
                     @"INSERT INTO question(name, type, options) VALUES (@QName, @Type, @Options);",
                     new { 
                         questionPostRequest.QName, 
-                        Type = dict[questionPostRequest.Type], 
+                        questionPostRequest.Type, 
                         Options = JsonSerializer.Serialize(questionPostRequest.Options)
                     }
                 );
 
                 return connection.QueryFirstOrDefault<Question>(
                     @"SELECT id, name, type, options FROM question ORDER BY id DESC LIMIT 1;"
+                );
+            }
+        }
+
+        public Result PostResult(ResultPostRequest resultPostRequest)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+
+                connection.Execute(
+                    @"INSERT INTO result(fid, answers) VALUES (@Fid, @Answers);",
+                    new
+                    {
+                        resultPostRequest.Fid,
+                        resultPostRequest.Answers
+                    }
+                );
+
+                return connection.QueryFirstOrDefault<Result>(
+                    @"SELECT id, fid, answers FROM result ORDER BY id DESC LIMIT 1;"
                 );
             }
         }
